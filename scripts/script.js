@@ -10,18 +10,16 @@ function updateDisplay() {
 
 // get operator symbol
 function getOperatorSymbol() {
-  if (operator === "add") {
+  if (operator === "+") {
     return "+";
-  } else if (operator === "subtract") {
+  } else if (operator === "-") {
     return "-";
-  } else if (operator === "multiply") {
+  } else if (operator === "*") {
     return "×";
-  } else if (operator === "divide") {
+  } else if (operator === "/") {
     return "÷";
-  } else if (operator === "modulus") {
+  } else if (operator === "%") {
     return "%";
-  } else if (operator === "equals") {
-    return "=";
   }
 }
 
@@ -38,45 +36,57 @@ function handleButtonClick(event) {
     firstNumber = "";
     operator = "";
     secondNumber = "";
-  } else if (action === "cancel") {
+  } else if (action === "backspace") {
     if (!operator) {
       firstNumber = firstNumber.slice(0, -1);
     } else {
       secondNumber = secondNumber.slice(0, -1);
     }
   } else if (
-    action === "add" ||
-    action === "subtract" ||
-    action === "multiply" ||
-    action === "divide" ||
-    action === "modulus"
+    action === "+" ||
+    action === "-" ||
+    action === "*" ||
+    action === "/" ||
+    action === "%"
   ) {
     operator = action;
+  } else if (action === "decimal") {
+    if (!operator) {
+      // add decimal point if first number doesn't already have one
+      if (!firstNumber.includes(".")) {
+        firstNumber += ".";
+      }
+    } else {
+      // add decimal point if second number doesn't already have one
+      if (!secondNumber.includes(".")) {
+        secondNumber += ".";
+      }
+    }
   } else if (action === "equals") {
     if (firstNumber && operator && secondNumber) {
       // perform calculation based on operator
       switch (operator) {
-        case "add":
+        case "+":
           firstNumber = (
             parseFloat(firstNumber) + parseFloat(secondNumber)
           ).toString();
           break;
-        case "subtract":
+        case "-":
           firstNumber = (
             parseFloat(firstNumber) - parseFloat(secondNumber)
           ).toString();
           break;
-        case "multiply":
+        case "*":
           firstNumber = (
             parseFloat(firstNumber) * parseFloat(secondNumber)
           ).toString();
           break;
-        case "divide":
+        case "/":
           firstNumber = (
             parseFloat(firstNumber) / parseFloat(secondNumber)
           ).toString();
           break;
-        case "modulus":
+        case "%":
           firstNumber = (
             parseFloat(firstNumber) % parseFloat(secondNumber)
           ).toString();
@@ -103,4 +113,31 @@ function handleButtonClick(event) {
 // add event listeners to buttons
 document.querySelectorAll(".calculator__keys button").forEach((button) => {
   button.addEventListener("click", handleButtonClick);
+});
+
+// keyboard support
+document.addEventListener("keydown", (event) => {
+  const key = event.key;
+  const digit = parseInt(key);
+  if (digit >= 0 && digit <= 9) {
+    handleButtonClick({
+      target: { dataset: { action: "digit" }, textContent: digit },
+    });
+  } else if (key === "Backspace") {
+    handleButtonClick({ target: { dataset: { action: "backspace" } } });
+  } else if (key === "Escape" || key === "Delete") {
+    handleButtonClick({ target: { dataset: { action: "clear" } } });
+  } else if (
+    key === "+" ||
+    key === "-" ||
+    key === "*" ||
+    key === "/" ||
+    key === "%"
+  ) {
+    handleButtonClick({ target: { dataset: { action: key } } });
+  } else if (key === ".") {
+    handleButtonClick({ target: { dataset: { action: "decimal" } } });
+  } else if (key === "=" || key === "Enter") {
+    handleButtonClick({ target: { dataset: { action: "equals" } } });
+  }
 });
